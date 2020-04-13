@@ -134,27 +134,27 @@ while (-1)
 	elsif ($menuselection eq "6")
 	{
 		# Edit lang.ini file
-		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/lang.ini");
+		system("$FileEditor \"$PSODIR/PSOBB\ Tethealla\ Server/Server/lang.ini\"");
 	}
 	elsif ($menuselection eq "7")
 	{
 		# Edit localgms.ini file
-		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/localgms.ini");
+		system("$FileEditor \"$PSODIR/PSOBB\ Tethealla\ Server/Server/localgms.ini\"");
 	}
 	elsif ($menuselection eq "8")
 	{
 		# Edit patch.ini file
-		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/patch.ini");
+		system("$FileEditor \"$PSODIR/PSOBB\ Tethealla\ Server/Server/patch.ini\"");
 	}
 	elsif ($menuselection eq "9")
 	{
 		# Edit ship.ini file
-		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/ship.ini");
+		system("$FileEditor \"$PSODIR/PSOBB\ Tethealla\ Server/Server/ship.ini\"");
 	}
 	elsif ($menuselection eq "10")
 	{
 		# Edit tethealla.ini file
-		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/tethealla.ini");
+		system("$FileEditor \"$PSODIR/PSOBB\ Tethealla\ Server/Server/tethealla.ini\"");
 	}
 	elsif ($menuselection eq "11")
 	{
@@ -167,7 +167,7 @@ while (-1)
 	elsif ($menuselection eq "12")
 	{
                 # Edit the welcome text
-		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/welcome.txt");
+		system("$FileEditor \"$PSODIR/PSOBB\ Tethealla\ Server/Server/welcome.txt\"");
 	}
 	elsif ($menuselection eq "13")
 	{
