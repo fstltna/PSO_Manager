@@ -1,0 +1,199 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use UI::Dialog;
+use Term::ReadKey;
+use Term::ANSIScreen qw(cls);
+
+my $FileEditor = "/bin/nano";
+my $InitDName = "/etc/init.d/pso";
+my $PSODIR = "/home/psoowner/PSOBBC_PC";
+my $BackupCommand = "/home/psoowner/PSO_Backup/psobackup.pl";
+my $PSOLog = "$PSODIR/PSOScreen.log";
+my $PSOPatchLog = "/tmp/PSOPatch.log";
+my $PSOShipLog = "/tmp/PSOShip.log";
+my $Pager = "/usr/bin/less";
+
+###################################################
+# No changes below here
+###################################################
+
+my $MMC_ver = "1.0.0";
+my $Record = "false";	# Are results saved?
+my $TempDir = "/tmp";
+my $RobotName = "";
+my $BotVersion = "";
+my $UserName = "";
+my $ServerStatus = "foo";
+
+my $d = new UI::Dialog ( backtitle => "PSO Management Console v$MMC_ver", height => 20, width => 65, listheight => 5,
+	order => [ 'ascii', 'cdialog', 'xdialog' ]);
+
+my $windowtitle = "Welcome to the PSO Management Console!";
+my $enjoyedtitle = "We hope you enjoyed PMC!";
+my $introtext =
+"This is the PSO Management Console, a utility for PSO operators
+to manage their servers from a text GUI rather than the command line.";
+
+$d->msgbox( title => $windowtitle, text => $introtext );
+
+if (($d->state() eq "ESC") || ($d->state() eq "CANCEL"))
+{
+	exit 0;
+}
+
+my $menuselection = "";
+
+sub CheckServerStatus
+{
+	my $running=`ps ax|grep login_server|grep -v grep`;
+	if ($running ne "")
+	{
+		$ServerStatus = "Running";
+	}
+	else
+	{
+		$ServerStatus = "Stopped";
+	}
+
+}
+
+sub MainMenu
+{
+	my $WantRespawn="ON";
+	CheckServerStatus();
+	if (-f "$PSODIR/nostart")
+	{
+		$WantRespawn="OFF";
+	}
+
+	$menuselection = $d->menu( title => "Main Menu", text => "Server is $ServerStatus and respawn is $WantRespawn - Select one:",
+                            list => [ '1', 'Start Server',
+                                      '2', 'Stop Server',
+                                      '3', 'Server Console',
+                                      '4', 'Turn Off Respawn',
+                                      '5', 'Turn Respawn On',
+                                      '6', 'Edit lang.ini',
+                                      '7', 'Edit localgms.ini',
+                                      '8', 'Edit patch.ini',
+                                      '9', 'Edit ship.ini',
+                                      '10', 'Edit tethealla.ini',
+                                      '11', 'Backup PSO',
+                                      '12', 'Edit Welcome.txt',
+                                      '13', 'View PSO Log',
+                                      '14', 'View Patch Log',
+                                      '15', 'View Ship Log',
+                                      '16', 'Kill PSO Process',
+                                      'q', 'Quit PMC' ] );
+}
+
+while (-1)
+{
+	MainMenu();
+	if (($menuselection eq "CANCEL") || ($menuselection eq "ESC") || ($menuselection eq "") || ($menuselection eq "q") || ($menuselection eq "Q"))
+	{
+		$d->msgbox( title => $enjoyedtitle, text => "Thanks for using PMC..." );
+		exit 0;
+	}
+	if ($menuselection eq "1")
+	{
+                if ($d->yesno( text => "Confirm starting the server", text => "Are you sure you want to start the server? You should likely use option #16 instead..." ))
+                {
+                        PrintDebugCommand("$InitDName start");
+                        system("$InitDName start");
+                        sleep(10);
+                }
+	}
+	elsif ($menuselection eq "2")
+	{
+		if ($d->yesno( text => "Confirm stopping the server", text => "Are you sure you want to shut down the server?" ))
+		{
+			system("$InitDName stop");
+			sleep(5);
+		}
+	}
+	elsif ($menuselection eq "3")
+	{
+		$d->msgbox( text => "To exit the PSO console and return to PMC press CTRL-A CTRL-D" );
+		system("screen -r PSO");
+	}
+	elsif ($menuselection eq "4")
+	{
+		# Turn off respawn
+		system("touch $PSODIR/nostart");
+	}
+	elsif ($menuselection eq "5")
+	{
+		# Turn respawn back on
+		if (-f "$PSODIR/nostart")
+		{
+			unlink("$PSODIR/nostart");
+		}
+	}
+	elsif ($menuselection eq "6")
+	{
+		# Edit lang.ini file
+		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/lang.ini");
+	}
+	elsif ($menuselection eq "7")
+	{
+		# Edit localgms.ini file
+		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/localgms.ini");
+	}
+	elsif ($menuselection eq "8")
+	{
+		# Edit patch.ini file
+		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/patch.ini");
+	}
+	elsif ($menuselection eq "9")
+	{
+		# Edit ship.ini file
+		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/ship.ini");
+	}
+	elsif ($menuselection eq "10")
+	{
+		# Edit tethealla.ini file
+		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/tethealla.ini");
+	}
+	elsif ($menuselection eq "11")
+	{
+                # Run a backup
+                system("clear");
+                system("$BackupCommand");
+                print "Press Enter To Continue";
+                my $entered = <STDIN>;
+	}
+	elsif ($menuselection eq "12")
+	{
+                # Edit the welcome text
+		system("$FileEditor $PSODIR/PSOBB Tethealla Server/Server/welcome.txt");
+	}
+	elsif ($menuselection eq "13")
+	{
+                # View the main log file
+                system("$Pager $PSOLog");
+	}
+	elsif ($menuselection eq "14")
+	{
+                # View the patch log file
+                system("$Pager  $PSOPatchLog");
+	}
+	elsif ($menuselection eq "15")
+	{
+                # View the ship log file
+                system("$Pager $PSOShipLog");
+	}
+	elsif ($menuselection eq "16")
+	{
+		my $running=`ps ax|grep login_server|grep -v grep`;
+	        if ($running ne "")
+		{
+			# Process is running, kill it
+			system("killall login_server");
+			sleep(5);
+		}
+	}
+}
+
+exit 0;
